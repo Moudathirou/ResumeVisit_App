@@ -31,3 +31,24 @@ Ce projet utilise Python 3.9 pour réaliser la transcription d'audio et la réda
 2. Installez les packages requis à l'aide de :
    ```bash
    pip install -r requirements.txt
+3. Créez un fichier .env à la racine du projet et ajoutez les clés suivantes :
+   ```bash
+   API_KEY="votre_clé_openai"
+   GROQ_API="votre_clé_groq"
+   SECRET_KEY="votre_clé_secrète"
+   MAIL_SERVER="smtp.votre_fournisseur.com"
+   MAIL_PORT=587
+   MAIL_USERNAME="votre_email"
+   MAIL_PASSWORD="votre_mot"
+   MAIL_DEFAULT_SENDER="votre_email"
+
+## Utilisation :
+1. Exécutez le script main.py.
+2. Sélectionnez le fichier audio à transcrire ou utilisez l'option d'enregistrement direct.
+3. Le système transcrira l'audio, générera un résumé et rédigera un email.
+4. Modifiez l'email généré avant de l'envoyer.
+
+
+## Démonstration Vidéo :
+https://github.com/user-attachments/assets/f65df275-c2fb-4e84-8642-a5ef98e4e63e
+
