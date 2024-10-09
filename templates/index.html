@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head> 
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CreativeHub - Transcription Audio</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/transcription.css') }}">
+</head>
+<body>
+    <header class="header">
+        <div class="logo">CreativeHub</div>
+    </header>
+    <main class="main-content">
+        <div id="transcription-page" class="tool-page">
+            <h2>Transcription Audio</h2>
+            <input type="file" id="transcriptionAudio" accept="audio/*,video/*">
+            <label for="transcriptionAudio" class="upload-label">Télécharger un fichier audio pour la transcription</label>
+            <div id="transcription-audio-container"></div>
+            <textarea id="transcription-output" readonly placeholder="La transcription apparaîtra ici..."></textarea>
+            <button id="summarize-btn" class="use-tool-btn" onclick="summarizeTranscription()" disabled>Résumer</button>
+            <textarea id="summary-output" readonly placeholder="Le résumé apparaîtra ici..." class="hidden"></textarea>
+        </div>
+        <div id="creation-output" class="hidden"></div>
+    </main>
+    <script>
+        document.getElementById('transcriptionAudio').addEventListener('change', function() {
+            handleTranscriptionFileUpload(this.files);
+        });
+
+        function handleTranscriptionFileUpload(files) {
+            if (files.length > 0) {
+                const file = files[0];
+                const audioContainer = document.getElementById('transcription-audio-container');
+                audioContainer.innerHTML = '';
+                const audio = document.createElement('audio');
+                audio.controls = true;
+                audio.src = URL.createObjectURL(file);
+                audioContainer.appendChild(audio);
+
+                // Créer FormData et envoyer le fichier au serveur
+                const formData = new FormData();
+                formData.append('audio_file', file);
+
+                const transcriptionOutput = document.getElementById('transcription-output');
+                const summarizeBtn = document.getElementById('summarize-btn');
+
+                transcriptionOutput.value = 'Transcription en cours...';
+                summarizeBtn.disabled = true;
+
+                fetch("{{ url_for('transcription') }}", {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        transcriptionOutput.value = data.error;
+                    } else {
+                        transcriptionOutput.value = data.transcription;
+                        summarizeBtn.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    transcriptionOutput.value = 'Une erreur est survenue lors de la transcription.';
+                });
+            }
+        }
+
+        function summarizeTranscription() {
+            const transcriptionText = document.getElementById('transcription-output').value;
+            const summaryOutput = document.getElementById('summary-output');
+            summaryOutput.classList.remove('hidden');
+            summaryOutput.value = 'Résumé en cours...';
+
+            fetch("{{ url_for('summarize') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({'transcription_text': transcriptionText})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    summaryOutput.value = data.error;
+                } else {
+                    summaryOutput.value = data.summary;
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                summaryOutput.value = 'Une erreur est survenue lors du résumé.';
+            });
+        }
+    </script>
+</body>
+</html>
